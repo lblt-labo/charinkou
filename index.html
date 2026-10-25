@@ -84,6 +84,12 @@ input:focus,textarea:focus,select:focus,button:focus-visible{outline:3px solid v
 #inst.show{display:flex}#inst.in{transform:none}
 #inst p{margin:0;flex:1;font-size:.88rem;font-weight:700}
 .err{background:#fff1e0;border:2px solid var(--orange);padding:.5rem;border-radius:6px;margin:.5rem}
+.crow{display:flex;gap:.3rem;align-items:stretch;margin-top:.4rem}
+.crow .chk{margin-top:0;flex:1}
+.mini{min-width:44px;padding:.2rem .3rem}
+.snap{border:2px dashed var(--ink2);border-radius:6px;padding:.4rem .6rem;margin-top:.5rem;font-size:.88rem;background:#f3f6f9}
+.pinned{border-color:var(--blue);border-width:3px;background:#e8f1fb}
+.badge{display:inline-block;border:2px solid var(--blue);color:var(--blue);border-radius:999px;padding:0 .5rem;font-size:.75rem;font-weight:700;margin-bottom:.2rem}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
@@ -102,11 +108,11 @@ input:focus,textarea:focus,select:focus,button:focus-visible{outline:3px solid v
   <section class="tab on" id="pre">
     <div class="card">
       <h2>置き場メモを書く</h2>
-      <label for="nLine">路線・駅（例：JR中央線）</label><input id="nLine" maxlength="40" placeholder="路線名や区間">
-      <label for="nCar">車両の形式（例：E233系）</label><input id="nCar" maxlength="40" placeholder="わからなければ空でもOK">
-      <label for="nSpot">置きやすい場所</label>
-      <select id="nSpot"><option>最後部の座席のうしろ</option><option>先頭車の端</option><option>デッキ（ドア横）</option><option>車いすスペース付近</option><option>荷物置き場</option><option>その他（メモに書く）</option></select>
-      <label for="nMemo">ローカルルール・コツ</label><textarea id="nMemo" maxlength="300" placeholder="例：朝は混むので始発駅から乗る"></textarea>
+      <label for="nTrain">列車名・タイプ（例：特急あずさ、普通電車）</label><input id="nTrain" maxlength="40" placeholder="乗る電車の名前や種類">
+      <label for="nLine">利用区間（例：新宿〜松本）</label><input id="nLine" maxlength="40" placeholder="どこからどこまで">
+      <label for="nSpot">車内の配置スペース</label>
+      <select id="nSpot"><option>最後部座席の裏</option><option>デッキの端</option><option>先頭車両の端</option><option>車いすスペースの近く</option><option>荷物置き場</option><option>その他（コツに書く）</option></select>
+      <label for="nMemo">自分なりのコツ</label><textarea id="nMemo" maxlength="300" placeholder="例：朝は混むので始発駅から乗る"></textarea>
       <div class="row"><button class="btn" id="nAdd">メモを保存</button></div>
     </div>
     <div class="card">
@@ -117,6 +123,7 @@ input:focus,textarea:focus,select:focus,button:focus-visible{outline:3px solid v
   </section>
 
   <section class="tab" id="day">
+    <div class="card pinned" id="nextCard" style="display:none"><h2>📌 次回の旅で使うメモ</h2><div id="nextList"></div></div>
     <div class="card">
       <h2>発車までのカウントダウン</h2>
       <label for="dTime">電車の発車時刻</label><input id="dTime" type="time">
@@ -145,7 +152,9 @@ input:focus,textarea:focus,select:focus,button:focus-visible{outline:3px solid v
       <label for="lSt">駅名</label><input id="lSt" maxlength="30" placeholder="例：奥多摩駅">
       <label for="lDate">日付</label><input id="lDate" type="date">
       <label for="lKind">できたこと</label><select id="lKind"><option>パッキング完了</option><option>組み立て完了</option></select>
-      <label for="lMemo">ひとこと</label><input id="lMemo" maxlength="60" placeholder="例：初めて10分で完了">
+      <label for="lNote">この旅で使った置き場メモ</label><select id="lNote"></select>
+      <label for="lSpotSel">この旅で使った作業スポット</label><select id="lSpotSel"></select>
+      <label for="lMemo">感想</label><textarea id="lMemo" maxlength="200" placeholder="例：初めて10分で完了。デッキの端が空いていた。"></textarea>
       <div class="row"><button class="btn" id="lAdd">カードを保存</button></div>
     </div>
     <div class="card"><h2>旅のログ</h2><div id="lList"></div></div>
@@ -155,9 +164,9 @@ input:focus,textarea:focus,select:focus,button:focus-visible{outline:3px solid v
 <div class="modal" id="mHelp" role="dialog" aria-modal="true" aria-labelledby="hT"><div class="sheet">
   <h2 id="hT">？ 使い方</h2>
   <ul>
-    <li><b>事前調べ</b>：電車の置きやすい場所やコツをメモ。キーワードで探せます。</li>
+    <li><b>事前調べ</b>：列車名・利用区間ごとに、自転車を置く場所やコツをメモ。キーワードで探せます。</li>
     <li><b>当日</b>：発車時刻を入れるとカウントダウン。チェックリストで忘れ物防止。駅の作業スポットも残せます。</li>
-    <li><b>きろく</b>：写真・駅名・日付で達成カードを作って保存します。</li>
+    <li><b>きろく</b>：写真・駅名・日付・感想でカードを保存。過去のカードから「次回用に呼び出す」を押すと、その時のメモを次回の旅で使えます。</li>
     <li><b>⚙ 設定</b>：パスコードロックの設定・解除ができます（最初はオフ）。</li>
   </ul>
   <p>データはこの端末の中だけに保存され、誰にも共有されません。ブラウザのデータを消すと記録も消えるのでご注意ください。</p>
@@ -199,6 +208,7 @@ document.addEventListener('DOMContentLoaded', function () {
       if (r) { var o = JSON.parse(r); if (o && typeof o === 'object') { for (var k in S) { if (o[k] !== undefined) S[k] = o[k]; } } }
     } catch (e) { console.error(e); }
     ['notes', 'spots', 'bikes', 'logs'].forEach(function (k) { if (!Array.isArray(S[k])) S[k] = []; });
+    S.notes.forEach(function (n) { if (n.route === undefined) { n.route = n.line || ''; n.train = n.car || ''; } n.spot = n.spot || ''; n.memo = n.memo || ''; });
   }
   function save() {
     try { localStorage.setItem(KEY, JSON.stringify(S)); return true; }
@@ -229,25 +239,61 @@ document.addEventListener('DOMContentLoaded', function () {
 
   /* ---------- 事前調べ ---------- */
   function delBtn(fn) { var b = el('button', 'btn del', '削除'); b.addEventListener('click', function () { if (confirm('削除しますか？')) { fn(); } }); return b; }
+  function noteTitle(n) { return '🚃 ' + (n.train || '列車名なし') + (n.route ? '｜' + n.route : ''); }
+  function pinBtn(o, rerender) {
+    var b = el('button', 'btn sub', o.next ? '📌 次回用をはずす' : '📌 次回用にする');
+    b.addEventListener('click', function () { o.next = !o.next; save(); rerender(); toast(o.next ? '📌 次回用にしました' : '次回用をはずしました'); });
+    return b;
+  }
+  function renderNext() {
+    var card = $('nextCard'), box = $('nextList'); if (!card || !box) return; box.textContent = '';
+    var ns = S.notes.filter(function (n) { return n.next; }), ss = S.spots.filter(function (x) { return x.next; });
+    card.style.display = (ns.length || ss.length) ? '' : 'none';
+    ns.forEach(function (n) {
+      var d = el('div', 'item'); d.appendChild(el('b', '', noteTitle(n))); d.appendChild(el('div', '', '📍 ' + n.spot));
+      if (n.memo) d.appendChild(el('div', 'meta', n.memo)); box.appendChild(d);
+    });
+    ss.forEach(function (x) { var d = el('div', 'item'); d.appendChild(el('b', '', '🏁 ' + x.st)); d.appendChild(el('div', 'meta', x.memo)); box.appendChild(d); });
+  }
+  function fillLogSel() {
+    var a = $('lNote'), b = $('lSpotSel'); if (!a || !b) return;
+    var va = a.value, vb = b.value;
+    a.textContent = ''; b.textContent = '';
+    var o1 = el('option', '', '選ばない'); o1.value = ''; a.appendChild(o1);
+    var o2 = el('option', '', '選ばない'); o2.value = ''; b.appendChild(o2);
+    S.notes.forEach(function (n) { var o = el('option', '', (n.train || '列車名なし') + (n.route ? '｜' + n.route : '') + '（' + n.spot + '）'); o.value = n.id; a.appendChild(o); });
+    S.spots.forEach(function (x) { var o = el('option', '', x.st + '：' + x.memo.slice(0, 16)); o.value = x.id; b.appendChild(o); });
+    a.value = va; if (a.selectedIndex < 0) a.selectedIndex = 0;
+    b.value = vb; if (b.selectedIndex < 0) b.selectedIndex = 0;
+  }
+  function afterMemo() { try { renderNext(); fillLogSel(); } catch (e) { console.error(e); } }
   function renderNotes() {
     var box = $('nList'); if (!box) return; box.textContent = '';
     var q = ($('nFind') && $('nFind').value || '').trim().toLowerCase();
-    var list = S.notes.filter(function (n) { return !q || (n.line + n.car + n.spot + n.memo).toLowerCase().indexOf(q) >= 0; });
-    if (!list.length) { box.appendChild(el('div', 'empty', q ? '見つかりませんでした' : 'まだメモがありません。上のフォームから書いてみよう。')); return; }
+    var list = S.notes.filter(function (n) { return !q || ((n.train || '') + (n.route || '') + n.spot + n.memo).toLowerCase().indexOf(q) >= 0; })
+      .sort(function (a, b) { return (b.next ? 1 : 0) - (a.next ? 1 : 0); });
+    if (!list.length) { box.appendChild(el('div', 'empty', q ? '見つかりませんでした' : 'まだメモがありません。上のフォームから書いてみよう。')); afterMemo(); return; }
     list.forEach(function (n) {
-      var d = el('div', 'item');
-      d.appendChild(el('b', '', '🚃 ' + (n.line || '路線未入力') + (n.car ? '（' + n.car + '）' : '')));
+      var d = el('div', n.next ? 'item pinned' : 'item');
+      if (n.next) d.appendChild(el('span', 'badge', '📌 次回用'));
+      d.appendChild(el('b', '', noteTitle(n)));
       d.appendChild(el('div', '', '📍 ' + n.spot));
       if (n.memo) d.appendChild(el('div', 'meta', n.memo));
-      var r = el('div', 'row'); r.appendChild(delBtn(function () { S.notes = S.notes.filter(function (x) { return x.id !== n.id; }); save(); renderNotes(); toast('削除しました'); })); d.appendChild(r);
-      box.appendChild(d);
+      var r = el('div', 'row');
+      r.appendChild(pinBtn(n, renderNotes));
+      var ed = el('button', 'btn sub', '✏ コツを直す');
+      ed.addEventListener('click', function () { var v = prompt('コツを書き直す', n.memo); if (v !== null) { n.memo = v.trim(); save(); renderNotes(); toast('✏ 直しました'); } });
+      r.appendChild(ed);
+      r.appendChild(delBtn(function () { S.notes = S.notes.filter(function (x) { return x.id !== n.id; }); save(); renderNotes(); toast('削除しました'); }));
+      d.appendChild(r); box.appendChild(d);
     });
+    afterMemo();
   }
   on('nAdd', 'click', function () {
-    var line = $('nLine').value.trim(), car = $('nCar').value.trim(), memo = $('nMemo').value.trim();
-    if (!line && !car) { toast('路線か形式をどちらか入れてね'); return; }
-    S.notes.unshift({ id: uid(), line: line, car: car, spot: $('nSpot').value, memo: memo });
-    if (save()) { $('nLine').value = ''; $('nCar').value = ''; $('nMemo').value = ''; renderNotes(); toast('✅ メモを保存しました'); }
+    var tr = $('nTrain').value.trim(), rt = $('nLine').value.trim(), memo = $('nMemo').value.trim();
+    if (!tr && !rt) { toast('列車名か利用区間をどちらか入れてね'); return; }
+    S.notes.unshift({ id: uid(), train: tr, route: rt, spot: $('nSpot').value, memo: memo, next: false });
+    if (save()) { $('nTrain').value = ''; $('nLine').value = ''; $('nMemo').value = ''; renderNotes(); toast('✅ メモを保存しました'); }
   });
   on('nFind', 'input', renderNotes);
 
@@ -299,13 +345,18 @@ document.addEventListener('DOMContentLoaded', function () {
       var p = el('p', 'prog', '■ ' + g[0] + '（' + done + '/' + items.length + '）' + (items.length && done === items.length ? ' ✓ 完了！' : ''));
       body.appendChild(p);
       items.forEach(function (i) {
+        var w = el('div', 'crow');
         var b = el('button', 'chk'); b.setAttribute('role', 'checkbox'); b.setAttribute('aria-checked', i.done ? 'true' : 'false');
         b.appendChild(el('span', 'bx')); b.appendChild(el('span', 'tx', i.t));
         b.addEventListener('click', function () {
           i.done = !i.done; save(); renderBikes();
           if (i.done && g[0] !== '忘れ物' && items.every(function (x) { return x.done; })) toast('🎉 ' + g[0] + '完了！きろくに残そう');
         });
-        body.appendChild(b);
+        var ed = el('button', 'btn sub mini', '✏'); ed.setAttribute('aria-label', i.t + 'を直す');
+        ed.addEventListener('click', function () { var v = prompt('項目の名前を直す', i.t); if (v !== null) { v = v.trim(); if (v) { i.t = v; save(); renderBikes(); toast('✏ 直しました'); } } });
+        var rm = el('button', 'btn del mini', '✕'); rm.setAttribute('aria-label', i.t + 'を消す');
+        rm.addEventListener('click', function () { if (confirm('「' + i.t + '」を消しますか？')) { cb.items = cb.items.filter(function (x) { return x.id !== i.id; }); save(); renderBikes(); toast('消しました'); } });
+        w.appendChild(b); w.appendChild(ed); w.appendChild(rm); body.appendChild(w);
       });
     });
     var add = el('div', 'row');
@@ -332,16 +383,20 @@ document.addEventListener('DOMContentLoaded', function () {
   /* ---------- 駅スポット ---------- */
   function renderSpots() {
     var box = $('sList'); if (!box) return; box.textContent = '';
-    if (!S.spots.length) { box.appendChild(el('div', 'empty', 'まだスポットがありません。')); return; }
-    S.spots.forEach(function (s) {
-      var d = el('div', 'item'); d.appendChild(el('b', '', '🏁 ' + s.st)); d.appendChild(el('div', 'meta', s.memo));
-      var r = el('div', 'row'); r.appendChild(delBtn(function () { S.spots = S.spots.filter(function (x) { return x.id !== s.id; }); save(); renderSpots(); toast('削除しました'); })); d.appendChild(r); box.appendChild(d);
+    if (!S.spots.length) { box.appendChild(el('div', 'empty', 'まだスポットがありません。')); afterMemo(); return; }
+    S.spots.slice().sort(function (a, b) { return (b.next ? 1 : 0) - (a.next ? 1 : 0); }).forEach(function (x) {
+      var d = el('div', x.next ? 'item pinned' : 'item');
+      if (x.next) d.appendChild(el('span', 'badge', '📌 次回用'));
+      d.appendChild(el('b', '', '🏁 ' + x.st)); d.appendChild(el('div', 'meta', x.memo));
+      var r = el('div', 'row'); r.appendChild(pinBtn(x, renderSpots));
+      r.appendChild(delBtn(function () { S.spots = S.spots.filter(function (y) { return y.id !== x.id; }); save(); renderSpots(); toast('削除しました'); })); d.appendChild(r); box.appendChild(d);
     });
+    afterMemo();
   }
   on('sAdd', 'click', function () {
     var st = $('sSt').value.trim(), m = $('sMemo').value.trim();
     if (!st) { toast('駅名を入れてね'); return; }
-    S.spots.unshift({ id: uid(), st: st, memo: m || '（メモなし）' });
+    S.spots.unshift({ id: uid(), st: st, memo: m || '（メモなし）', next: false });
     if (save()) { $('sSt').value = ''; $('sMemo').value = ''; renderSpots(); toast('✅ スポットを保存しました'); }
   });
 
@@ -368,6 +423,17 @@ document.addEventListener('DOMContentLoaded', function () {
     } catch (e) { cb(null); }
   }
   function fmtDate(s) { var p = (s || '').split('-'); return p.length === 3 ? p[0] + '年' + (+p[1]) + '月' + (+p[2]) + '日' : s; }
+  function reuse(l) {
+    if (l.noteSnap) {
+      var q = l.noteSnap, f = S.notes.filter(function (x) { return (x.train || '') === (q.train || '') && (x.route || '') === (q.route || '') && x.spot === q.spot && x.memo === q.memo; });
+      if (f.length) f[0].next = true; else S.notes.unshift({ id: uid(), train: q.train, route: q.route, spot: q.spot, memo: q.memo, next: true });
+    }
+    if (l.spotSnap) {
+      var r = l.spotSnap, g = S.spots.filter(function (x) { return x.st === r.st && x.memo === r.memo; });
+      if (g.length) g[0].next = true; else S.spots.unshift({ id: uid(), st: r.st, memo: r.memo, next: true });
+    }
+    if (save()) { renderNotes(); renderSpots(); toast('📌 次回用に呼び出しました'); showTab('day'); }
+  }
   function renderLogs() {
     var box = $('lList'); if (!box) return; box.textContent = '';
     if (!S.logs.length) { box.appendChild(el('div', 'empty', 'まだカードがありません。最初の1枚を作ろう！')); return; }
@@ -378,18 +444,32 @@ document.addEventListener('DOMContentLoaded', function () {
       b.appendChild(el('div', 'st', l.st));
       b.appendChild(el('div', 'meta', fmtDate(l.date)));
       b.appendChild(el('span', 'tg', '✓ ' + l.kind));
-      if (l.memo) b.appendChild(el('div', '', l.memo));
-      var r = el('div', 'row'); r.appendChild(delBtn(function () { S.logs = S.logs.filter(function (x) { return x.id !== l.id; }); save(); renderLogs(); toast('カードを削除しました'); })); b.appendChild(r);
+      if (l.memo) b.appendChild(el('div', '', '💬 ' + l.memo));
+      if (l.noteSnap) {
+        var sn = el('div', 'snap'); sn.appendChild(el('b', '', '📝 使った置き場メモ')); sn.appendChild(el('div', '', noteTitle(l.noteSnap)));
+        sn.appendChild(el('div', '', '📍 ' + l.noteSnap.spot)); if (l.noteSnap.memo) sn.appendChild(el('div', 'meta', l.noteSnap.memo)); b.appendChild(sn);
+      }
+      if (l.spotSnap) {
+        var sp = el('div', 'snap'); sp.appendChild(el('b', '', '🏁 使った作業スポット')); sp.appendChild(el('div', '', l.spotSnap.st)); sp.appendChild(el('div', 'meta', l.spotSnap.memo)); b.appendChild(sp);
+      }
+      var r = el('div', 'row');
+      if (l.noteSnap || l.spotSnap) {
+        var re = el('button', 'btn', '📌 次回用に呼び出す'); re.addEventListener('click', function () { reuse(l); }); r.appendChild(re);
+      }
+      r.appendChild(delBtn(function () { S.logs = S.logs.filter(function (x) { return x.id !== l.id; }); save(); renderLogs(); toast('カードを削除しました'); })); b.appendChild(r);
       t.appendChild(b); box.appendChild(t);
     });
   }
   on('lAdd', 'click', function () {
     var st = $('lSt').value.trim(); if (!st) { toast('駅名を入れてね'); return; }
     var f = $('lPhoto').files && $('lPhoto').files[0];
+    var nid = $('lNote').value, sid = $('lSpotSel').value, ns = null, ss = null;
+    S.notes.forEach(function (n) { if (n.id === nid) ns = { train: n.train, route: n.route, spot: n.spot, memo: n.memo }; });
+    S.spots.forEach(function (x) { if (x.id === sid) ss = { st: x.st, memo: x.memo }; });
     function finish(img) {
-      var card = { id: uid(), st: st, date: $('lDate').value || today(), kind: $('lKind').value, memo: $('lMemo').value.trim(), img: img || '' };
+      var card = { id: uid(), st: st, date: $('lDate').value || today(), kind: $('lKind').value, memo: $('lMemo').value.trim(), img: img || '', noteSnap: ns, spotSnap: ss };
       S.logs.unshift(card);
-      if (save()) { $('lSt').value = ''; $('lMemo').value = ''; $('lPhoto').value = ''; renderLogs(); toast('🎫 達成カードを保存しました'); }
+      if (save()) { $('lSt').value = ''; $('lMemo').value = ''; $('lPhoto').value = ''; renderLogs(); toast('🎫 カードを保存しました'); }
       else { S.logs.shift(); renderLogs(); }
     }
     if (f) { toast('写真を小さくしています…'); compress(f, function (d) { if (!d) toast('写真は読み込めなかったので、写真なしで保存します'); finish(d); }); }

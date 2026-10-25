@@ -1,4 +1,4 @@
-var CACHE = 'charinkou-v1';
+var CACHE = 'charinkou-v2';
 var FILES = ['./', './index.html', './manifest.json', './icon-192.png', './icon-512.png', './ogp.png'];
 
 self.addEventListener('install', function (e) {
