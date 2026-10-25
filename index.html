@@ -105,7 +105,7 @@ input:focus,textarea:focus,select:focus,button:focus-visible{outline:3px solid v
 <nav role="tablist" aria-label="メニュー">
   <button role="tab" id="t-pre" data-tab="pre" aria-selected="true">事前調べ</button>
   <button role="tab" id="t-day" data-tab="day" aria-selected="false">当日</button>
-  <button role="tab" id="t-log" data-tab="log" aria-selected="false">きろく</button>
+  <button role="tab" id="t-log" data-tab="log" aria-selected="false">記録</button>
 </nav>
 <main>
   <section class="tab on" id="pre">
@@ -171,7 +171,7 @@ input:focus,textarea:focus,select:focus,button:focus-visible{outline:3px solid v
   <ul>
     <li><b>事前調べ</b>：列車名・利用区間ごとに、自転車を置く場所やコツをメモ。「過去のメモを呼び出す」から、いつでも見返せます。</li>
     <li><b>当日</b>：発車時刻を入れるとカウントダウン。チェックリストで忘れ物防止。駅の作業スポットも残せます。</li>
-    <li><b>きろく</b>：写真・駅名・日付・感想でカードを保存。過去のカードから「過去のメモを呼び出す」を押すと、その時のメモを次回の旅で使えます。</li>
+    <li><b>記録</b>：写真・駅名・日付・感想でカードを保存。過去のカードから「過去のメモを呼び出す」を押すと、その時のメモを次回の旅で使えます。</li>
     <li><b>⚙ 設定</b>：パスコードロックの設定・解除ができます（最初はオフ）。</li>
   </ul>
   <p>データはこの端末の中だけに保存され、誰にも共有されません。ブラウザのデータを消すと記録も消えるのでご注意ください。</p>
@@ -377,7 +377,7 @@ document.addEventListener('DOMContentLoaded', function () {
         b.appendChild(el('span', 'bx')); b.appendChild(el('span', 'tx', i.t));
         b.addEventListener('click', function () {
           i.done = !i.done; save(); renderBikes();
-          if (i.done && g[0] !== '忘れ物' && items.every(function (x) { return x.done; })) toast('🎉 ' + g[0] + '完了！きろくに残そう');
+          if (i.done && g[0] !== '忘れ物' && items.every(function (x) { return x.done; })) toast('🎉 ' + g[0] + '完了！記録に残そう');
         });
         var ed = el('button', 'btn sub mini', '✏'); ed.setAttribute('aria-label', i.t + 'を直す');
         ed.addEventListener('click', function () { var v = prompt('項目の名前を直す', i.t); if (v !== null) { v = v.trim(); if (v) { i.t = v; save(); renderBikes(); toast('✏ 直しました'); } } });
@@ -427,7 +427,7 @@ document.addEventListener('DOMContentLoaded', function () {
     if (save()) { $('sSt').value = ''; $('sMemo').value = ''; renderSpots(); toast('✅ スポットを保存しました'); }
   });
 
-  /* ---------- きろく ---------- */
+  /* ---------- 記録 ---------- */
   function compress(file, cb) {
     try {
       var fr = new FileReader();
