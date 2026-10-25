@@ -103,7 +103,7 @@ input:focus,textarea:focus,select:focus,button:focus-visible{outline:3px solid v
   <button class="ib" id="btnSet" aria-label="設定を開く">⚙</button>
 </header>
 <nav role="tablist" aria-label="メニュー">
-  <button role="tab" id="t-pre" data-tab="pre" aria-selected="true">事前調べ</button>
+  <button role="tab" id="t-pre" data-tab="pre" aria-selected="true">事前準備</button>
   <button role="tab" id="t-day" data-tab="day" aria-selected="false">当日</button>
   <button role="tab" id="t-log" data-tab="log" aria-selected="false">記録</button>
 </nav>
@@ -169,7 +169,7 @@ input:focus,textarea:focus,select:focus,button:focus-visible{outline:3px solid v
 <div class="modal" id="mHelp" role="dialog" aria-modal="true" aria-labelledby="hT"><div class="sheet">
   <h2 id="hT">？ 使い方</h2>
   <ul>
-    <li><b>事前調べ</b>：列車名・利用区間ごとに、自転車を置く場所やコツをメモ。「過去のメモを呼び出す」から、いつでも見返せます。</li>
+    <li><b>事前準備</b>：列車名・利用区間ごとに、自転車を置く場所やコツをメモ。「過去のメモを呼び出す」から、いつでも見返せます。</li>
     <li><b>当日</b>：発車時刻を入れるとカウントダウン。チェックリストで忘れ物防止。駅の作業スポットも残せます。</li>
     <li><b>記録</b>：写真・駅名・日付・感想でカードを保存。過去のカードから「過去のメモを呼び出す」を押すと、その時のメモを次回の旅で使えます。</li>
     <li><b>⚙ 設定</b>：パスコードロックの設定・解除ができます（最初はオフ）。</li>
@@ -242,7 +242,7 @@ document.addEventListener('DOMContentLoaded', function () {
   on('btnHelp', 'click', function () { openM('mHelp'); });
   on('btnSet', 'click', function () { updPass(); openM('mSet'); });
 
-  /* ---------- 事前調べ ---------- */
+  /* ---------- 事前準備 ---------- */
   function delBtn(fn) { var b = el('button', 'btn del', '削除'); b.addEventListener('click', function () { if (confirm('削除しますか？')) { fn(); } }); return b; }
   function noteTitle(n) { return '🚃 ' + (n.train || '列車名なし') + (n.route ? '｜' + n.route : ''); }
   function pinBtn(o, rerender) {
