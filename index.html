@@ -90,6 +90,9 @@ input:focus,textarea:focus,select:focus,button:focus-visible{outline:3px solid v
 .snap{border:2px dashed var(--ink2);border-radius:6px;padding:.4rem .6rem;margin-top:.5rem;font-size:.88rem;background:#f3f6f9}
 .pinned{border-color:var(--blue);border-width:3px;background:#e8f1fb}
 .badge{display:inline-block;border:2px solid var(--blue);color:var(--blue);border-radius:999px;padding:0 .5rem;font-size:.75rem;font-weight:700;margin-bottom:.2rem}
+.seg{display:flex;gap:.3rem;align-items:center;margin-top:.4rem}
+.seg input{flex:1;min-width:0}
+.seg span{font-weight:800;font-size:1.2rem}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
@@ -109,15 +112,17 @@ input:focus,textarea:focus,select:focus,button:focus-visible{outline:3px solid v
     <div class="card">
       <h2>置き場メモを書く</h2>
       <label for="nTrain">列車名・タイプ（例：特急あずさ、普通電車）</label><input id="nTrain" maxlength="40" placeholder="乗る電車の名前や種類">
-      <label for="nLine">利用区間（例：新宿〜松本）</label><input id="nLine" maxlength="40" placeholder="どこからどこまで">
+      <label>利用区間（乗継ぎは「＋区間を追加」）</label>
+      <div id="segBox"></div>
+      <div class="row"><button class="btn sub" id="segAdd" type="button">＋区間を追加</button></div>
       <label for="nSpot">車内の配置スペース</label>
       <select id="nSpot"><option>最後部座席の裏</option><option>デッキの端</option><option>先頭車両の端</option><option>車いすスペースの近く</option><option>荷物置き場</option><option>その他（コツに書く）</option></select>
       <label for="nMemo">自分なりのコツ</label><textarea id="nMemo" maxlength="300" placeholder="例：朝は混むので始発駅から乗る"></textarea>
       <div class="row"><button class="btn" id="nAdd">メモを保存</button></div>
     </div>
     <div class="card">
-      <h2>メモを探す</h2>
-      <label for="nFind">キーワード</label><input id="nFind" type="search" placeholder="路線・形式・場所・コツから検索">
+      <h2>過去のメモを呼び出す</h2>
+      <label for="nFind">キーワードで絞りこむ</label><input id="nFind" type="search" placeholder="列車名・駅・置き場所・コツで絞りこみ">
       <div id="nList"></div>
     </div>
   </section>
@@ -164,9 +169,9 @@ input:focus,textarea:focus,select:focus,button:focus-visible{outline:3px solid v
 <div class="modal" id="mHelp" role="dialog" aria-modal="true" aria-labelledby="hT"><div class="sheet">
   <h2 id="hT">？ 使い方</h2>
   <ul>
-    <li><b>事前調べ</b>：列車名・利用区間ごとに、自転車を置く場所やコツをメモ。キーワードで探せます。</li>
+    <li><b>事前調べ</b>：列車名・利用区間ごとに、自転車を置く場所やコツをメモ。「過去のメモを呼び出す」から、いつでも見返せます。</li>
     <li><b>当日</b>：発車時刻を入れるとカウントダウン。チェックリストで忘れ物防止。駅の作業スポットも残せます。</li>
-    <li><b>きろく</b>：写真・駅名・日付・感想でカードを保存。過去のカードから「次回用に呼び出す」を押すと、その時のメモを次回の旅で使えます。</li>
+    <li><b>きろく</b>：写真・駅名・日付・感想でカードを保存。過去のカードから「過去のメモを呼び出す」を押すと、その時のメモを次回の旅で使えます。</li>
     <li><b>⚙ 設定</b>：パスコードロックの設定・解除ができます（最初はオフ）。</li>
   </ul>
   <p>データはこの端末の中だけに保存され、誰にも共有されません。ブラウザのデータを消すと記録も消えるのでご注意ください。</p>
@@ -289,11 +294,33 @@ document.addEventListener('DOMContentLoaded', function () {
     });
     afterMemo();
   }
+  function addSeg(f, t) {
+    var box = $('segBox'); if (!box) return;
+    var row = el('div', 'seg');
+    var i1 = el('input'); i1.className = 'sf'; i1.maxLength = 20; i1.placeholder = '出発駅'; i1.setAttribute('aria-label', '出発駅'); i1.value = f || '';
+    var mid = el('span', '', '〜'); mid.setAttribute('aria-hidden', 'true');
+    var i2 = el('input'); i2.className = 'st2'; i2.maxLength = 20; i2.placeholder = '到着駅'; i2.setAttribute('aria-label', '到着駅'); i2.value = t || '';
+    var x = el('button', 'btn del mini', '✕'); x.type = 'button'; x.setAttribute('aria-label', 'この区間を消す');
+    x.addEventListener('click', function () { if (box.children.length > 1) { box.removeChild(row); } else { i1.value = ''; i2.value = ''; } });
+    row.appendChild(i1); row.appendChild(mid); row.appendChild(i2); row.appendChild(x); box.appendChild(row);
+  }
+  function resetSeg() { var box = $('segBox'); if (box) { box.textContent = ''; addSeg('', ''); } }
+  function readSegs() {
+    var out = [], box = $('segBox'); if (!box) return out;
+    Array.prototype.forEach.call(box.children, function (r) {
+      var a = r.querySelector('.sf'), b = r.querySelector('.st2');
+      var f = a ? a.value.trim() : '', t = b ? b.value.trim() : '';
+      if (f || t) out.push((f || '？') + '〜' + (t || '？'));
+    });
+    return out;
+  }
+  resetSeg();
+  on('segAdd', 'click', function () { addSeg('', ''); toast('区間の枠を足しました'); var r = $('segBox'); var l = r && r.lastChild && r.lastChild.querySelector('input'); if (l) l.focus(); });
   on('nAdd', 'click', function () {
-    var tr = $('nTrain').value.trim(), rt = $('nLine').value.trim(), memo = $('nMemo').value.trim();
-    if (!tr && !rt) { toast('列車名か利用区間をどちらか入れてね'); return; }
-    S.notes.unshift({ id: uid(), train: tr, route: rt, spot: $('nSpot').value, memo: memo, next: false });
-    if (save()) { $('nTrain').value = ''; $('nLine').value = ''; $('nMemo').value = ''; renderNotes(); toast('✅ メモを保存しました'); }
+    var tr = $('nTrain').value.trim(), segs = readSegs(), memo = $('nMemo').value.trim();
+    if (!tr && !segs.length) { toast('列車名か利用区間をどちらか入れてね'); return; }
+    S.notes.unshift({ id: uid(), train: tr, route: segs.join(' → '), spot: $('nSpot').value, memo: memo, next: false });
+    if (save()) { $('nTrain').value = ''; $('nMemo').value = ''; resetSeg(); renderNotes(); toast('✅ メモを保存しました'); }
   });
   on('nFind', 'input', renderNotes);
 
@@ -432,7 +459,7 @@ document.addEventListener('DOMContentLoaded', function () {
       var r = l.spotSnap, g = S.spots.filter(function (x) { return x.st === r.st && x.memo === r.memo; });
       if (g.length) g[0].next = true; else S.spots.unshift({ id: uid(), st: r.st, memo: r.memo, next: true });
     }
-    if (save()) { renderNotes(); renderSpots(); toast('📌 次回用に呼び出しました'); showTab('day'); }
+    if (save()) { renderNotes(); renderSpots(); toast('📌 過去のメモを呼び出しました（次回用）'); showTab('day'); }
   }
   function renderLogs() {
     var box = $('lList'); if (!box) return; box.textContent = '';
@@ -454,7 +481,7 @@ document.addEventListener('DOMContentLoaded', function () {
       }
       var r = el('div', 'row');
       if (l.noteSnap || l.spotSnap) {
-        var re = el('button', 'btn', '📌 次回用に呼び出す'); re.addEventListener('click', function () { reuse(l); }); r.appendChild(re);
+        var re = el('button', 'btn', '📌 過去のメモを呼び出す'); re.addEventListener('click', function () { reuse(l); }); r.appendChild(re);
       }
       r.appendChild(delBtn(function () { S.logs = S.logs.filter(function (x) { return x.id !== l.id; }); save(); renderLogs(); toast('カードを削除しました'); })); b.appendChild(r);
       t.appendChild(b); box.appendChild(t);
