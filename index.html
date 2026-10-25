@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>チャリンコウ - 愛車と旅するサイクリストのための輪行ノート</title>
+<meta name="description" content="事前準備から当日作業、旅の記録までトータルでサポートする輪行備忘録PWAアプリ。">
+<meta name="theme-color" content="#14304d">
+<meta property="og:type" content="website">
+<meta property="og:title" content="チャリンコウ - 愛車と旅するサイクリストのための輪行ノート">
+<meta property="og:description" content="事前準備から当日作業、旅の記録までトータルでサポートする輪行備忘録PWAアプリ。">
+<meta property="og:image" content="./ogp.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="チャリンコウ - 愛車と旅するサイクリストのための輪行ノート">
+<meta name="twitter:description" content="事前準備から当日作業、旅の記録までトータルでサポートする輪行備忘録PWAアプリ。">
+<meta name="twitter:image" content="./ogp.png">
+<link rel="manifest" href="./manifest.json">
+<link rel="icon" href="./icon-192.png">
+<link rel="apple-touch-icon" href="./icon-192.png">
+<style>
+:root{--ink:#14304d;--ink2:#35506b;--paper:#f3f6f9;--card:#fff;--line:#9fb3c6;--blue:#0b5cad;--orange:#b84a00;--ok:#00614a;--bg-warn:#fff1e0;font-family:"Hiragino Sans","Noto Sans JP",system-ui,sans-serif}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0}
+body{background:var(--paper);color:var(--ink);font-size:16px;line-height:1.6;padding-bottom:2rem}
+header{position:sticky;top:0;z-index:20;background:var(--ink);color:#fff;padding:calc(env(safe-area-inset-top,0px) + .5rem) .75rem .5rem;display:flex;align-items:center;gap:.5rem}
+header .ttl{flex:1;min-width:0}
+header h1{margin:0;font-size:1.25rem;letter-spacing:.08em;line-height:1.2}
+header p{margin:0;font-size:.7rem;opacity:.9}
+.ib{min-width:44px;min-height:44px;border:2px solid #fff;border-radius:50%;background:transparent;color:#fff;font-size:1.15rem;font-weight:700;cursor:pointer}
+nav{display:flex;background:#fff;border-bottom:3px solid var(--ink);position:sticky;top:calc(env(safe-area-inset-top,0px) + 3.6rem);z-index:15}
+nav button{flex:1;min-height:48px;border:0;background:#fff;color:var(--ink2);font-size:.95rem;font-weight:700;cursor:pointer;border-bottom:5px solid transparent}
+nav button[aria-selected=true]{color:var(--ink);background:#dfeaf5;border-bottom-color:var(--blue)}
+nav button[aria-selected=true]::before{content:"▶ "}
+main{max-width:640px;margin:0 auto;padding:.75rem}
+.tab{display:none}.tab.on{display:block}
+.card{background:var(--card);border:2px solid var(--ink);border-radius:6px 6px 6px 6px;padding:.75rem;margin-bottom:.9rem}
+.card h2{margin:0 0 .5rem;font-size:1.05rem;border-left:6px solid var(--blue);padding-left:.5rem}
+label{display:block;font-size:.85rem;font-weight:700;margin:.5rem 0 .15rem}
+input,textarea,select{width:100%;min-height:44px;border:2px solid var(--ink2);border-radius:6px;padding:.4rem .6rem;font:inherit;background:#fff;color:var(--ink)}
+textarea{min-height:76px}
+input:focus,textarea:focus,select:focus,button:focus-visible{outline:3px solid var(--orange);outline-offset:2px}
+.btn{min-height:44px;padding:.4rem 1rem;border:2px solid var(--ink);border-radius:6px;background:var(--blue);color:#fff;font:inherit;font-weight:700;cursor:pointer;transition:transform .08s}
+.btn.sub{background:#fff;color:var(--ink)}
+.btn.del{background:#fff;color:var(--orange);border-color:var(--orange)}
+.btn:active,.ib:active,nav button:active,.chk:active{transform:scale(.95)}
+.row{display:flex;gap:.5rem;flex-wrap:wrap;align-items:center;margin-top:.6rem}
+.item{border:2px solid var(--line);border-radius:6px;padding:.5rem .6rem;margin-top:.5rem;background:#fafcfe}
+.item b{display:block}.item small{color:var(--ink2)}
+.item .meta{font-size:.8rem;color:var(--ink2)}
+.empty{color:var(--ink2);font-size:.9rem;padding:.4rem 0}
+.timer{text-align:center;border:3px double var(--ink);border-radius:6px;padding:.6rem;margin-top:.6rem;background:#fff}
+.timer .big{font-size:2.4rem;font-weight:800;font-variant-numeric:tabular-nums;line-height:1.2}
+.timer.warn{background:var(--bg-warn);border:4px solid var(--orange)}
+.timer.warn .big{color:var(--orange)}
+.chk{display:flex;align-items:center;gap:.6rem;width:100%;min-height:48px;text-align:left;border:2px solid var(--line);border-radius:6px;background:#fff;color:var(--ink);font:inherit;padding:.3rem .6rem;margin-top:.4rem;cursor:pointer}
+.chk .bx{flex:none;width:28px;height:28px;border:3px solid var(--ink);border-radius:5px;display:grid;place-items:center;font-weight:800;color:#fff}
+.chk[aria-checked=true]{background:#e3f3ee;border-color:var(--ok)}
+.chk[aria-checked=true] .bx{background:var(--ok);border-color:var(--ok)}
+.chk[aria-checked=true] .bx::after{content:"✓"}
+.chk[aria-checked=true] .tx{text-decoration:line-through}
+.prog{font-size:.85rem;font-weight:700;color:var(--ink2);margin:.6rem 0 0}
+.ticket{position:relative;background:#fff;border:3px solid var(--ink);border-radius:10px;margin-top:.7rem;overflow:hidden}
+.ticket .ph{width:100%;max-height:260px;object-fit:cover;display:block;border-bottom:3px dashed var(--ink)}
+.ticket .noph{padding:1.2rem;text-align:center;font-size:2rem;border-bottom:3px dashed var(--ink);background:#dfeaf5}
+.ticket .bd{padding:.5rem .75rem}
+.ticket .st{font-size:1.3rem;font-weight:800}
+.ticket .tg{display:inline-block;border:2px solid var(--ok);color:var(--ok);border-radius:999px;padding:0 .6rem;font-size:.8rem;font-weight:700}
+.ticket .bd .row{margin-top:.3rem}
+.modal{position:fixed;inset:0;z-index:50;background:rgba(10,25,40,.6);display:none;align-items:flex-end;justify-content:center}
+.modal.on{display:flex}
+.sheet{background:#fff;width:100%;max-width:640px;max-height:88vh;overflow:auto;border-radius:14px 14px 0 0;padding:1rem 1rem calc(1rem + env(safe-area-inset-bottom,0px));animation:up .22s ease-out}
+@keyframes up{from{transform:translateY(40px);opacity:0}to{transform:none;opacity:1}}
+.sheet h2{margin:0 0 .5rem;font-size:1.15rem}
+.sheet ol,.sheet ul{padding-left:1.2rem;margin:.3rem 0}
+#lock{position:fixed;inset:0;z-index:100;background:var(--ink);color:#fff;display:none;flex-direction:column;align-items:center;justify-content:center;padding:1rem}
+#lock.on{display:flex}
+#dots{font-size:2rem;letter-spacing:.4rem;min-height:3rem}
+.pad{display:grid;grid-template-columns:repeat(3,72px);gap:10px;margin:.6rem 0}
+.pad button{min-height:60px;border-radius:50%;border:2px solid #fff;background:transparent;color:#fff;font-size:1.4rem;font-weight:700;cursor:pointer}
+.pad button:active{background:#fff;color:var(--ink)}
+#toast{position:fixed;left:50%;bottom:calc(5rem + env(safe-area-inset-bottom,0px));transform:translate(-50%,20px);background:var(--ink);color:#fff;border:2px solid #fff;padding:.5rem 1rem;border-radius:999px;font-weight:700;opacity:0;pointer-events:none;transition:.25s;z-index:80;max-width:90%;text-align:center}
+#toast.on{opacity:1;transform:translate(-50%,0)}
+#inst{position:fixed;left:.5rem;right:.5rem;bottom:calc(.5rem + env(safe-area-inset-bottom,0px));z-index:60;max-width:620px;margin:0 auto;background:#fff;border:3px solid var(--blue);border-radius:10px;padding:.6rem .75rem;display:none;gap:.5rem;align-items:center;transform:translateY(130%);transition:transform .45s ease}
+#inst.show{display:flex}#inst.in{transform:none}
+#inst p{margin:0;flex:1;font-size:.88rem;font-weight:700}
+.err{background:#fff1e0;border:2px solid var(--orange);padding:.5rem;border-radius:6px;margin:.5rem}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<header>
+  <div class="ttl"><h1>🚲 チャリンコウ</h1><p>愛車と旅するサイクリストのための輪行ノート</p></div>
+  <button class="ib" id="btnHelp" aria-label="使い方を見る">？</button>
+  <button class="ib" id="btnSet" aria-label="設定を開く">⚙</button>
+</header>
+<nav role="tablist" aria-label="メニュー">
+  <button role="tab" id="t-pre" data-tab="pre" aria-selected="true">事前調べ</button>
+  <button role="tab" id="t-day" data-tab="day" aria-selected="false">当日</button>
+  <button role="tab" id="t-log" data-tab="log" aria-selected="false">きろく</button>
+</nav>
+<main>
+  <section class="tab on" id="pre">
+    <div class="card">
+      <h2>置き場メモを書く</h2>
+      <label for="nLine">路線・駅（例：JR中央線）</label><input id="nLine" maxlength="40" placeholder="路線名や区間">
+      <label for="nCar">車両の形式（例：E233系）</label><input id="nCar" maxlength="40" placeholder="わからなければ空でもOK">
+      <label for="nSpot">置きやすい場所</label>
+      <select id="nSpot"><option>最後部の座席のうしろ</option><option>先頭車の端</option><option>デッキ（ドア横）</option><option>車いすスペース付近</option><option>荷物置き場</option><option>その他（メモに書く）</option></select>
+      <label for="nMemo">ローカルルール・コツ</label><textarea id="nMemo" maxlength="300" placeholder="例：朝は混むので始発駅から乗る"></textarea>
+      <div class="row"><button class="btn" id="nAdd">メモを保存</button></div>
+    </div>
+    <div class="card">
+      <h2>メモを探す</h2>
+      <label for="nFind">キーワード</label><input id="nFind" type="search" placeholder="路線・形式・場所・コツから検索">
+      <div id="nList"></div>
+    </div>
+  </section>
+
+  <section class="tab" id="day">
+    <div class="card">
+      <h2>発車までのカウントダウン</h2>
+      <label for="dTime">電車の発車時刻</label><input id="dTime" type="time">
+      <div class="row"><button class="btn" id="dSet">タイマー開始</button><button class="btn sub" id="dClr">リセット</button></div>
+      <div class="timer" id="timer" role="timer" aria-live="off"><div id="tMsg">発車時刻を入れてね</div><div class="big" id="tBig">--:--</div></div>
+    </div>
+    <div class="card">
+      <h2>愛車のチェックリスト</h2>
+      <label for="bSel">愛車を選ぶ</label><select id="bSel"></select>
+      <div class="row"><input id="bName" maxlength="20" placeholder="新しい愛車の名前" style="flex:1;min-width:140px"><button class="btn" id="bAdd">愛車を追加</button></div>
+      <div id="bBody"></div>
+    </div>
+    <div class="card">
+      <h2>駅の作業スポットメモ</h2>
+      <label for="sSt">駅名</label><input id="sSt" maxlength="30" placeholder="例：奥多摩駅">
+      <label for="sMemo">作業しやすい場所</label><textarea id="sMemo" maxlength="200" placeholder="例：改札を出て右の広場。ベンチあり。"></textarea>
+      <div class="row"><button class="btn" id="sAdd">スポットを保存</button></div>
+      <div id="sList"></div>
+    </div>
+  </section>
+
+  <section class="tab" id="log">
+    <div class="card">
+      <h2>輪行達成カードを作る</h2>
+      <label for="lPhoto">写真（なくてもOK）</label><input id="lPhoto" type="file" accept="image/*">
+      <label for="lSt">駅名</label><input id="lSt" maxlength="30" placeholder="例：奥多摩駅">
+      <label for="lDate">日付</label><input id="lDate" type="date">
+      <label for="lKind">できたこと</label><select id="lKind"><option>パッキング完了</option><option>組み立て完了</option></select>
+      <label for="lMemo">ひとこと</label><input id="lMemo" maxlength="60" placeholder="例：初めて10分で完了">
+      <div class="row"><button class="btn" id="lAdd">カードを保存</button></div>
+    </div>
+    <div class="card"><h2>旅のログ</h2><div id="lList"></div></div>
+  </section>
+</main>
+
+<div class="modal" id="mHelp" role="dialog" aria-modal="true" aria-labelledby="hT"><div class="sheet">
+  <h2 id="hT">？ 使い方</h2>
+  <ul>
+    <li><b>事前調べ</b>：電車の置きやすい場所やコツをメモ。キーワードで探せます。</li>
+    <li><b>当日</b>：発車時刻を入れるとカウントダウン。チェックリストで忘れ物防止。駅の作業スポットも残せます。</li>
+    <li><b>きろく</b>：写真・駅名・日付で達成カードを作って保存します。</li>
+    <li><b>⚙ 設定</b>：パスコードロックの設定・解除ができます（最初はオフ）。</li>
+  </ul>
+  <p>データはこの端末の中だけに保存され、誰にも共有されません。ブラウザのデータを消すと記録も消えるのでご注意ください。</p>
+  <div class="row"><button class="btn" data-close="mHelp">とじる</button></div>
+</div></div>
+
+<div class="modal" id="mSet" role="dialog" aria-modal="true" aria-labelledby="sT"><div class="sheet">
+  <h2 id="sT">⚙ 設定</h2>
+  <p>パスコードロック：<b id="pState">オフ</b></p>
+  <label for="pNew">数字のコード（4〜8けた）</label>
+  <input id="pNew" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="8" autocomplete="off">
+  <div class="row"><button class="btn" id="pSave">設定・変更する</button><button class="btn del" id="pOff">解除する</button></div>
+  <div class="row"><button class="btn sub" data-close="mSet">とじる</button></div>
+</div></div>
+
+<div id="lock" role="dialog" aria-modal="true" aria-label="パスコード入力">
+  <h2>🔒 パスコードを入力</h2><div id="dots" aria-live="polite"></div><div id="lMsg" style="min-height:1.5rem"></div>
+  <div class="pad" id="pad"></div>
+</div>
+<div id="toast" role="status" aria-live="polite"></div>
+<div id="inst" role="region" aria-label="ホーム画面に追加の案内"><p id="instTx">ホーム画面に追加してアプリとして使う</p><button class="btn" id="instGo">追加</button><button class="btn sub" id="instX" aria-label="案内を閉じる">✕</button></div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var KEY = 'charinkou_v1';
+  var S = { notes: [], spots: [], bikes: [], logs: [], depart: '', pass: '', bikeId: '', hideInstall: false };
+  function $(id) { return document.getElementById(id); }
+  function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
+  function el(tag, cls, text) { var e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
+  function on(id, ev, fn) { var e = $(id); if (e) e.addEventListener(ev, function (x) { try { fn(x); } catch (err) { console.error(err); toast('うまく動きませんでした'); } }); }
+  var tt = null;
+  function toast(msg) { var t = $('toast'); if (!t) return; t.textContent = msg; t.classList.add('on'); clearTimeout(tt); tt = setTimeout(function () { t.classList.remove('on'); }, 2200); }
+  function hash(s) { var h = 5381; for (var i = 0; i < s.length; i++) h = ((h << 5) + h + s.charCodeAt(i)) | 0; return 'p' + h; }
+  function today() { var d = new Date(); return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2); }
+
+  function load() {
+    try {
+      var r = localStorage.getItem(KEY);
+      if (r) { var o = JSON.parse(r); if (o && typeof o === 'object') { for (var k in S) { if (o[k] !== undefined) S[k] = o[k]; } } }
+    } catch (e) { console.error(e); }
+    ['notes', 'spots', 'bikes', 'logs'].forEach(function (k) { if (!Array.isArray(S[k])) S[k] = []; });
+  }
+  function save() {
+    try { localStorage.setItem(KEY, JSON.stringify(S)); return true; }
+    catch (e) { toast('保存できませんでした。古いカードを消してみてね'); return false; }
+  }
+
+  /* ---------- タブ ---------- */
+  function showTab(name) {
+    ['pre', 'day', 'log'].forEach(function (n) {
+      var s = $(n), b = $('t-' + n);
+      if (s) s.classList.toggle('on', n === name);
+      if (b) b.setAttribute('aria-selected', n === name ? 'true' : 'false');
+    });
+    window.scrollTo(0, 0);
+  }
+  Array.prototype.forEach.call(document.querySelectorAll('nav button'), function (b) {
+    b.addEventListener('click', function () { showTab(b.getAttribute('data-tab')); });
+  });
+
+  /* ---------- モーダル ---------- */
+  function openM(id) { var m = $(id); if (m) m.classList.add('on'); }
+  function closeM(id) { var m = $(id); if (m) m.classList.remove('on'); }
+  Array.prototype.forEach.call(document.querySelectorAll('[data-close]'), function (b) { b.addEventListener('click', function () { closeM(b.getAttribute('data-close')); }); });
+  Array.prototype.forEach.call(document.querySelectorAll('.modal'), function (m) { m.addEventListener('click', function (e) { if (e.target === m) m.classList.remove('on'); }); });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') { closeM('mHelp'); closeM('mSet'); } });
+  on('btnHelp', 'click', function () { openM('mHelp'); });
+  on('btnSet', 'click', function () { updPass(); openM('mSet'); });
+
+  /* ---------- 事前調べ ---------- */
+  function delBtn(fn) { var b = el('button', 'btn del', '削除'); b.addEventListener('click', function () { if (confirm('削除しますか？')) { fn(); } }); return b; }
+  function renderNotes() {
+    var box = $('nList'); if (!box) return; box.textContent = '';
+    var q = ($('nFind') && $('nFind').value || '').trim().toLowerCase();
+    var list = S.notes.filter(function (n) { return !q || (n.line + n.car + n.spot + n.memo).toLowerCase().indexOf(q) >= 0; });
+    if (!list.length) { box.appendChild(el('div', 'empty', q ? '見つかりませんでした' : 'まだメモがありません。上のフォームから書いてみよう。')); return; }
+    list.forEach(function (n) {
+      var d = el('div', 'item');
+      d.appendChild(el('b', '', '🚃 ' + (n.line || '路線未入力') + (n.car ? '（' + n.car + '）' : '')));
+      d.appendChild(el('div', '', '📍 ' + n.spot));
+      if (n.memo) d.appendChild(el('div', 'meta', n.memo));
+      var r = el('div', 'row'); r.appendChild(delBtn(function () { S.notes = S.notes.filter(function (x) { return x.id !== n.id; }); save(); renderNotes(); toast('削除しました'); })); d.appendChild(r);
+      box.appendChild(d);
+    });
+  }
+  on('nAdd', 'click', function () {
+    var line = $('nLine').value.trim(), car = $('nCar').value.trim(), memo = $('nMemo').value.trim();
+    if (!line && !car) { toast('路線か形式をどちらか入れてね'); return; }
+    S.notes.unshift({ id: uid(), line: line, car: car, spot: $('nSpot').value, memo: memo });
+    if (save()) { $('nLine').value = ''; $('nCar').value = ''; $('nMemo').value = ''; renderNotes(); toast('✅ メモを保存しました'); }
+  });
+  on('nFind', 'input', renderNotes);
+
+  /* ---------- タイマー ---------- */
+  var tick = null;
+  function target() {
+    if (!S.depart) return null;
+    var p = S.depart.split(':'); if (p.length < 2) return null;
+    var d = new Date(); d.setHours(+p[0], +p[1], 0, 0); return d;
+  }
+  function pad2(n) { return ('0' + n).slice(-2); }
+  function renderTimer() {
+    var box = $('timer'), msg = $('tMsg'), big = $('tBig'); if (!box || !msg || !big) return;
+    var t = target();
+    if (!t) { box.classList.remove('warn'); msg.textContent = '発車時刻を入れてね'; big.textContent = '--:--'; return; }
+    var s = Math.floor((t - new Date()) / 1000);
+    if (s <= 0) { box.classList.add('warn'); msg.textContent = '⚠ 発車時刻になりました'; big.textContent = '00:00'; return; }
+    var h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), sec = s % 60;
+    big.textContent = (h ? h + ':' : '') + pad2(m) + ':' + pad2(sec);
+    if (s <= 600) { box.classList.add('warn'); msg.textContent = '⚠ もうすぐ発車！あと10分以内'; }
+    else { box.classList.remove('warn'); msg.textContent = S.depart + ' 発 まであと'; }
+  }
+  function startTick() { clearInterval(tick); renderTimer(); if (S.depart) tick = setInterval(renderTimer, 1000); }
+  on('dSet', 'click', function () {
+    var v = $('dTime').value; if (!v) { toast('発車時刻を入れてね'); return; }
+    S.depart = v; save(); startTick(); toast('⏱ タイマーを開始しました');
+  });
+  on('dClr', 'click', function () { S.depart = ''; $('dTime').value = ''; save(); clearInterval(tick); renderTimer(); toast('リセットしました'); });
+
+  /* ---------- チェックリスト ---------- */
+  var DEF = [['パッキング', ['ライト・サイコン・ボトルを外す', '空気を少し抜く', '前輪を外す', 'チェーンをカバーで包む', '輪行袋に入れる', 'ベルトでしっかり固定']],
+    ['組み立て', ['袋から出す', '前輪を付ける', 'クイックレバーを締め直す', 'ブレーキの効きを確認', '空気を入れる', 'ライト・サイコンを付ける']],
+    ['忘れ物', ['エンド金具', '輪行袋', 'ベルト', 'タイヤカバー', '工具・輪行ノート']]];
+  function newBike(name) {
+    var items = []; DEF.forEach(function (g) { g[1].forEach(function (t) { items.push({ id: uid(), kind: g[0], t: t, done: false }); }); });
+    return { id: uid(), name: name, items: items };
+  }
+  function curBike() { for (var i = 0; i < S.bikes.length; i++) if (S.bikes[i].id === S.bikeId) return S.bikes[i]; return S.bikes[0] || null; }
+  function renderBikes() {
+    var sel = $('bSel'), body = $('bBody'); if (!sel || !body) return;
+    if (!S.bikes.length) { S.bikes.push(newBike('マイバイク')); S.bikeId = S.bikes[0].id; save(); }
+    var cb = curBike(); S.bikeId = cb.id;
+    sel.textContent = '';
+    S.bikes.forEach(function (b) { var o = el('option', '', b.name); o.value = b.id; if (b.id === cb.id) o.selected = true; sel.appendChild(o); });
+    body.textContent = '';
+    DEF.forEach(function (g) {
+      var items = cb.items.filter(function (i) { return i.kind === g[0]; });
+      var done = items.filter(function (i) { return i.done; }).length;
+      var p = el('p', 'prog', '■ ' + g[0] + '（' + done + '/' + items.length + '）' + (items.length && done === items.length ? ' ✓ 完了！' : ''));
+      body.appendChild(p);
+      items.forEach(function (i) {
+        var b = el('button', 'chk'); b.setAttribute('role', 'checkbox'); b.setAttribute('aria-checked', i.done ? 'true' : 'false');
+        b.appendChild(el('span', 'bx')); b.appendChild(el('span', 'tx', i.t));
+        b.addEventListener('click', function () {
+          i.done = !i.done; save(); renderBikes();
+          if (i.done && g[0] !== '忘れ物' && items.every(function (x) { return x.done; })) toast('🎉 ' + g[0] + '完了！きろくに残そう');
+        });
+        body.appendChild(b);
+      });
+    });
+    var add = el('div', 'row');
+    var inp = el('input'); inp.placeholder = '項目を足す（例：輪行バッグの鍵）'; inp.maxLength = 30; inp.style.flex = '1'; inp.style.minWidth = '150px'; inp.setAttribute('aria-label', '追加する項目');
+    var kd = el('select'); kd.setAttribute('aria-label', '項目の種類'); DEF.forEach(function (g) { var o = el('option', '', g[0]); kd.appendChild(o); }); kd.style.width = 'auto';
+    var ab = el('button', 'btn', '項目を追加');
+    ab.addEventListener('click', function () { var v = inp.value.trim(); if (!v) { toast('項目名を入れてね'); return; } cb.items.push({ id: uid(), kind: kd.value, t: v, done: false }); save(); renderBikes(); toast('追加しました'); });
+    add.appendChild(inp); add.appendChild(kd); add.appendChild(ab); body.appendChild(add);
+    var ops = el('div', 'row');
+    var rs = el('button', 'btn sub', 'チェックを全部はずす');
+    rs.addEventListener('click', function () { cb.items.forEach(function (i) { i.done = false; }); save(); renderBikes(); toast('リセットしました'); });
+    var mk = el('button', 'btn', '達成カードを作る');
+    mk.addEventListener('click', function () { showTab('log'); });
+    ops.appendChild(rs); ops.appendChild(mk);
+    if (S.bikes.length > 1) { ops.appendChild(delBtn(function () { S.bikes = S.bikes.filter(function (b) { return b.id !== cb.id; }); S.bikeId = S.bikes[0].id; save(); renderBikes(); toast('愛車を削除しました'); })); }
+    body.appendChild(ops);
+  }
+  on('bSel', 'change', function () { S.bikeId = $('bSel').value; save(); renderBikes(); });
+  on('bAdd', 'click', function () {
+    var v = $('bName').value.trim(); if (!v) { toast('愛車の名前を入れてね'); return; }
+    var b = newBike(v); S.bikes.push(b); S.bikeId = b.id; save(); $('bName').value = ''; renderBikes(); toast('🚲 ' + v + ' を追加しました');
+  });
+
+  /* ---------- 駅スポット ---------- */
+  function renderSpots() {
+    var box = $('sList'); if (!box) return; box.textContent = '';
+    if (!S.spots.length) { box.appendChild(el('div', 'empty', 'まだスポットがありません。')); return; }
+    S.spots.forEach(function (s) {
+      var d = el('div', 'item'); d.appendChild(el('b', '', '🏁 ' + s.st)); d.appendChild(el('div', 'meta', s.memo));
+      var r = el('div', 'row'); r.appendChild(delBtn(function () { S.spots = S.spots.filter(function (x) { return x.id !== s.id; }); save(); renderSpots(); toast('削除しました'); })); d.appendChild(r); box.appendChild(d);
+    });
+  }
+  on('sAdd', 'click', function () {
+    var st = $('sSt').value.trim(), m = $('sMemo').value.trim();
+    if (!st) { toast('駅名を入れてね'); return; }
+    S.spots.unshift({ id: uid(), st: st, memo: m || '（メモなし）' });
+    if (save()) { $('sSt').value = ''; $('sMemo').value = ''; renderSpots(); toast('✅ スポットを保存しました'); }
+  });
+
+  /* ---------- きろく ---------- */
+  function compress(file, cb) {
+    try {
+      var fr = new FileReader();
+      fr.onerror = function () { cb(null); };
+      fr.onload = function () {
+        var img = new Image();
+        img.onerror = function () { cb(null); };
+        img.onload = function () {
+          try {
+            var w = img.width, h = img.height, max = 800;
+            if (w > max) { h = Math.round(h * max / w); w = max; }
+            var c = document.createElement('canvas'); c.width = w; c.height = h;
+            var cx = c.getContext('2d'); cx.drawImage(img, 0, 0, w, h);
+            cb(c.toDataURL('image/jpeg', 0.6));
+          } catch (e) { cb(null); }
+        };
+        img.src = fr.result;
+      };
+      fr.readAsDataURL(file);
+    } catch (e) { cb(null); }
+  }
+  function fmtDate(s) { var p = (s || '').split('-'); return p.length === 3 ? p[0] + '年' + (+p[1]) + '月' + (+p[2]) + '日' : s; }
+  function renderLogs() {
+    var box = $('lList'); if (!box) return; box.textContent = '';
+    if (!S.logs.length) { box.appendChild(el('div', 'empty', 'まだカードがありません。最初の1枚を作ろう！')); return; }
+    S.logs.forEach(function (l) {
+      var t = el('div', 'ticket');
+      if (l.img) { var im = el('img', 'ph'); im.src = l.img; im.alt = l.st + 'の写真'; t.appendChild(im); } else { t.appendChild(el('div', 'noph', '🚲')); }
+      var b = el('div', 'bd');
+      b.appendChild(el('div', 'st', l.st));
+      b.appendChild(el('div', 'meta', fmtDate(l.date)));
+      b.appendChild(el('span', 'tg', '✓ ' + l.kind));
+      if (l.memo) b.appendChild(el('div', '', l.memo));
+      var r = el('div', 'row'); r.appendChild(delBtn(function () { S.logs = S.logs.filter(function (x) { return x.id !== l.id; }); save(); renderLogs(); toast('カードを削除しました'); })); b.appendChild(r);
+      t.appendChild(b); box.appendChild(t);
+    });
+  }
+  on('lAdd', 'click', function () {
+    var st = $('lSt').value.trim(); if (!st) { toast('駅名を入れてね'); return; }
+    var f = $('lPhoto').files && $('lPhoto').files[0];
+    function finish(img) {
+      var card = { id: uid(), st: st, date: $('lDate').value || today(), kind: $('lKind').value, memo: $('lMemo').value.trim(), img: img || '' };
+      S.logs.unshift(card);
+      if (save()) { $('lSt').value = ''; $('lMemo').value = ''; $('lPhoto').value = ''; renderLogs(); toast('🎫 達成カードを保存しました'); }
+      else { S.logs.shift(); renderLogs(); }
+    }
+    if (f) { toast('写真を小さくしています…'); compress(f, function (d) { if (!d) toast('写真は読み込めなかったので、写真なしで保存します'); finish(d); }); }
+    else finish('');
+  });
+
+  /* ---------- パスコード ---------- */
+  var buf = '';
+  function updPass() { var s = $('pState'); if (s) s.textContent = S.pass ? 'オン' : 'オフ'; }
+  function drawDots() { var d = $('dots'); if (d) d.textContent = buf ? Array(buf.length + 1).join('●') : '○ ○ ○ ○'; }
+  function showLock() { if (!S.pass) return; buf = ''; drawDots(); $('lMsg').textContent = ''; $('lock').classList.add('on'); }
+  function buildPad() {
+    var pad = $('pad'); if (!pad) return; pad.textContent = '';
+    ['1', '2', '3', '4', '5', '6', '7', '8', '9', '消', '0', '開'].forEach(function (k) {
+      var b = el('button', '', k); b.type = 'button';
+      b.setAttribute('aria-label', k === '消' ? '1文字消す' : k === '開' ? 'ロックを開ける' : k);
+      b.addEventListener('click', function () {
+        if (k === '消') buf = buf.slice(0, -1);
+        else if (k === '開') {
+          if (hash(buf) === S.pass) { $('lock').classList.remove('on'); buf = ''; }
+          else { $('lMsg').textContent = '✕ コードがちがいます'; buf = ''; }
+        } else if (buf.length < 8) buf += k;
+        drawDots();
+      });
+      pad.appendChild(b);
+    });
+  }
+  on('pSave', 'click', function () {
+    var v = $('pNew').value.trim();
+    if (!/^[0-9]{4,8}$/.test(v)) { toast('数字を4〜8けた入れてね'); return; }
+    S.pass = hash(v); save(); $('pNew').value = ''; updPass(); toast('🔒 パスコードを設定しました');
+  });
+  on('pOff', 'click', function () { if (!S.pass) { toast('今はオフです'); return; } S.pass = ''; save(); updPass(); toast('🔓 パスコードを解除しました'); });
+  document.addEventListener('visibilitychange', function () { try { if (document.hidden && S.pass) showLock(); } catch (e) {} });
+
+  /* ---------- インストール案内 ---------- */
+  var dp = null;
+  function showInst(txt, canInstall) {
+    var b = $('inst'); if (!b || S.hideInstall) return;
+    $('instTx').textContent = txt; $('instGo').style.display = canInstall ? '' : 'none';
+    b.classList.add('show'); setTimeout(function () { b.classList.add('in'); }, 60);
+  }
+  function hideInst(remember) { var b = $('inst'); if (b) { b.classList.remove('in'); setTimeout(function () { b.classList.remove('show'); }, 450); } if (remember) { S.hideInstall = true; save(); } }
+  window.addEventListener('beforeinstallprompt', function (e) { e.preventDefault(); dp = e; setTimeout(function () { showInst('ホーム画面に追加してアプリとして使う', true); }, 1200); });
+  window.addEventListener('appinstalled', function () { hideInst(true); });
+  on('instGo', 'click', function () { if (dp) { dp.prompt(); dp.userChoice.then(function () { dp = null; hideInst(true); }).catch(function () { hideInst(true); }); } });
+  on('instX', 'click', function () { hideInst(true); });
+  try {
+    var ios = /iphone|ipad|ipod/i.test(navigator.userAgent), standalone = window.navigator.standalone || (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches);
+    if (ios && !standalone) setTimeout(function () { showInst('共有ボタン □↑ から「ホーム画面に追加」でアプリとして使えます', false); }, 1500);
+  } catch (e) {}
+
+  /* ---------- 起動 ---------- */
+  try {
+    load();
+    if ($('lDate')) $('lDate').value = today();
+    if ($('dTime') && S.depart) $('dTime').value = S.depart;
+    buildPad(); renderNotes(); renderBikes(); renderSpots(); renderLogs(); startTick(); updPass();
+    showLock();
+  } catch (e) {
+    console.error(e);
+    var m = document.querySelector('main'); if (m) { var er = el('div', 'err', '一部の表示に失敗しました。ページを開き直してください。'); m.insertBefore(er, m.firstChild); }
+  }
+  try { if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js').catch(function () {}); } catch (e) {}
+});
+</script>
+<footer style="text-align: center; font-size: 0.75rem; color: #888; margin-top: 3rem; padding: 1rem 0.5rem; line-height: 1.5;">
+  <p style="margin-bottom: 0.5rem;">【ご利用について】</p>
+  <p style="margin-bottom: 0.5rem;">本アプリの利用に伴うトラブルやデータ損失等について、開発者は一切の責任を負いかねます。</p>
+  <p style="margin-bottom: 0.5rem;">ご意見・不具合のご報告は X（<a href="https://x.com/lblt_labo" target="_blank" rel="noopener" style="color: #666; text-decoration: underline;">@lblt_labo</a>）までお願いいたします。</p>
+  <p style="margin-top: 0.5rem;"><a href="https://ofuse.me/lbltlabo/letter" target="_blank" rel="noopener noreferrer" style="color: #666; text-decoration: underline;">☕️ 開発者を応援する / メッセージを送る</a></p>
+</footer>
+</body>
+</html>

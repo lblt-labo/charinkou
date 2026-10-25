@@ -1,0 +1,17 @@
+{
+  "name": "チャリンコウ - 愛車と旅するサイクリストのための輪行ノート",
+  "short_name": "チャリンコウ",
+  "description": "事前準備から当日作業、旅の記録までトータルでサポートする輪行備忘録PWAアプリ。",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f3f6f9",
+  "theme_color": "#14304d",
+  "lang": "ja",
+  "icons": [
+    { "src": "./icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "./icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "./icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
